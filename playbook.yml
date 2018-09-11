@@ -1,0 +1,53 @@
+- hosts: server
+  vars:
+    - www_root: /home/www
+    - hostnames:
+      - ep2015-static.wirtel.be
+      - ep2016-static.wirtel.be
+      - ep2017-static.wirtel.be
+          
+  tasks:
+    - name: Create the directories
+      block:
+        - name: Create the parent directory
+          file:
+            path: "{{www_root}}/{{item}}"
+            state: directory
+            owner: www-data
+            group: www-data
+          with_items: &hostnames
+            "{{hostnames}}"
+
+        - name: Create the src directory
+          file:
+            path: "{{www_root}}/{{ item }}/src"
+            state: directory
+            owner: www-data
+            group: www-data
+          with_items: *hostnames
+
+        - name: Create the nginx.conf directory
+          file:
+            path: "{{www_root}}/{{ item }}/log"
+            state: directory
+            owner: www-data
+            group: www-data
+          with_items: *hostnames
+
+        - name: Create the nginx.conf directory
+          file:
+            path: "{{www_root}}/{{ item }}/conf"
+            state: directory
+            owner: www-data
+            group: www-data
+          with_items: *hostnames
+
+    - name: Generate the config for nginx
+      template:
+        src: templates/nginx.conf.j2
+        dest: "{{www_root}}/{{item}}/conf/nginx.conf"
+        owner: www-data
+        group: www-data
+      loop: "{{ hostnames }}"
+
+          
